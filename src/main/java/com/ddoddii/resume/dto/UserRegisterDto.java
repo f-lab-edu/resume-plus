@@ -3,9 +3,12 @@ package com.ddoddii.resume.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+
+@Getter
+@Setter
 public class UserRegisterDto {
     @NotBlank(message = "유저아이디를 입력해주세요")
     @Size(min = 5, max = 15, message = "유저아이디는 5자 이상 15자 이하로 입력해주세요")
