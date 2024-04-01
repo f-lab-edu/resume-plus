@@ -1,8 +1,10 @@
 package com.ddoddii.resume.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class UserLoginRequestDto {
     private String username;
     private String password;
