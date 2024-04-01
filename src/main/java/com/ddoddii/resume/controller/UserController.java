@@ -5,6 +5,8 @@ import com.ddoddii.resume.dto.UserRegisterDto;
 import com.ddoddii.resume.model.RoleType;
 import com.ddoddii.resume.model.User;
 import com.ddoddii.resume.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,8 @@ public class UserController {
 
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
 
     @Autowired
     public UserController(UserService userService, AuthenticationManager authenticationManager) {
@@ -40,7 +44,10 @@ public class UserController {
             user.setPassword(userRegisterDto.getPassword());
             user.setRole(RoleType.USER);
 
+            logger.info("Registering user: {}", user.getUsername());
+
             userService.registerUser(user);
+            logger.info("User registered successfully: {}", user.getUsername());
             return ResponseEntity.ok("User registered successfully");
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
