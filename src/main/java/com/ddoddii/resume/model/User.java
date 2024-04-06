@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,8 +18,7 @@ import lombok.Setter;
 @Entity
 @Table(name = "users",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = "username"),
-                @UniqueConstraint(columnNames = "email")
+                @UniqueConstraint(columnNames = "user_id")
         })
 @Getter
 @Setter
@@ -28,19 +28,26 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "username", unique = true)
-    private String username;
+    @Column(name = "user_id", unique = true)
+    private String userId;
 
     @Column(name = "password")
     private String password;
 
-    @Column(name = "email", unique = true)
+    @Column(name = "name")
+    private String name;
+
+    @Column(name = "email")
     private String email;
 
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private RoleType role;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
     @OneToMany(mappedBy = "user")
     private List<Resume> resumes;
+
 }
