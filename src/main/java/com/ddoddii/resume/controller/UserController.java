@@ -1,8 +1,9 @@
 package com.ddoddii.resume.controller;
 
 import com.ddoddii.resume.dto.ResultDTO;
-import com.ddoddii.resume.dto.UserDTO;
+import com.ddoddii.resume.dto.UserSignUpRequestDTO;
 import com.ddoddii.resume.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public ResponseEntity<ResultDTO<String>> signUp(@RequestBody UserDTO user) {
+    public ResponseEntity<ResultDTO<String>> signUp(@RequestBody @Valid UserSignUpRequestDTO user) {
         userService.signUp(user);
         return ResponseEntity.ok(
                 ResultDTO.res(HttpStatus.CREATED, HttpStatus.CREATED.toString(), "User created successfully"));

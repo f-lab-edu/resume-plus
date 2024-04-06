@@ -7,7 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.ddoddii.resume.dto.UserDTO;
+import com.ddoddii.resume.dto.UserSignUpRequestDTO;
 import com.ddoddii.resume.error.exception.DuplicateIdException;
 import com.ddoddii.resume.error.exception.NotExistIdException;
 import com.ddoddii.resume.model.User;
@@ -33,7 +33,7 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    UserDTO user;
+    UserSignUpRequestDTO user;
 
     @BeforeEach
     public void setUp() {
@@ -42,7 +42,7 @@ class UserServiceTest {
 
     @BeforeEach
     public void makeUser() {
-        user = UserDTO.builder()
+        user = UserSignUpRequestDTO.builder()
                 .userId("user")
                 .password(PasswordEncrypter.encrypt("test123"))
                 .email("test@email.com")

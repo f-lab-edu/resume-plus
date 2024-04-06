@@ -1,6 +1,6 @@
 package com.ddoddii.resume.service;
 
-import com.ddoddii.resume.dto.UserDTO;
+import com.ddoddii.resume.dto.UserSignUpRequestDTO;
 import com.ddoddii.resume.error.errorcode.UserErrorCode;
 import com.ddoddii.resume.error.exception.DuplicateIdException;
 import com.ddoddii.resume.error.exception.NotExistIdException;
@@ -22,23 +22,23 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public void signUp(UserDTO userDTO) {
-        if (userRepository.existsByUserId(userDTO.getUserId())) {
+    public void signUp(UserSignUpRequestDTO userSignUpRequestDTO) {
+        if (userRepository.existsByUserId(userSignUpRequestDTO.getUserId())) {
             throw new DuplicateIdException(UserErrorCode.DUPLICATE_USER);
         }
 
-        User encryptedUser = encryptUser(userDTO);
+        User encryptedUser = encryptUser(userSignUpRequestDTO);
 
         userRepository.save(encryptedUser);
     }
 
-    private User encryptUser(UserDTO userDTO) {
-        String encryptedPassword = PasswordEncrypter.encrypt(userDTO.getPassword());
+    private User encryptUser(UserSignUpRequestDTO userSignUpRequestDTO) {
+        String encryptedPassword = PasswordEncrypter.encrypt(userSignUpRequestDTO.getPassword());
         User user = new User();
-        user.setUserId(userDTO.getUserId());
+        user.setUserId(userSignUpRequestDTO.getUserId());
         user.setPassword(encryptedPassword);
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
+        user.setName(userSignUpRequestDTO.getName());
+        user.setEmail(userSignUpRequestDTO.getEmail());
         user.setRole(RoleType.USER);
         user.setCreatedAt(LocalDateTime.now());
         return user;
@@ -58,14 +58,14 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public Optional<UserDTO> findUserByIdAndPassword(String id, String password) {
+    public Optional<UserSignUpRequestDTO> findUserByIdAndPassword(String id, String password) {
         return userRepository.findByUserId(id)
                 .filter(user -> PasswordEncrypter.isMatch(password, user.getPassword()))
                 .map(this::convertToDto);
     }
 
-    private UserDTO convertToDto(User user) {
-        return UserDTO.builder()
+    private UserSignUpRequestDTO convertToDto(User user) {
+        return UserSignUpRequestDTO.builder()
                 .userId(user.getUserId())
                 .email(user.getEmail())
                 .name(user.getName())
