@@ -1,4 +1,4 @@
-package com.ddoddii.resume.model;
+package com.ddoddii.resume.model.eunm;
 
 public enum RoleType {
     USER,
