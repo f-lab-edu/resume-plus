@@ -35,3 +35,7 @@ out/
 
 ### VS Code ###
 .vscode/
+
+myapp.log
+src/main/resources/env.properties
+src/main/resources/application.yaml
