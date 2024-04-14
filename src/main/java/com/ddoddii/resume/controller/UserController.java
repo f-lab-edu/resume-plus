@@ -1,11 +1,12 @@
 package com.ddoddii.resume.controller;
 
-import com.ddoddii.resume.dto.ResultDTO;
+import com.ddoddii.resume.dto.UserLoginRequestDTO;
+import com.ddoddii.resume.dto.UserLoginResponseDTO;
 import com.ddoddii.resume.dto.UserSignUpRequestDTO;
+import com.ddoddii.resume.dto.UserSignUpResponseDTO;
 import com.ddoddii.resume.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,11 +20,16 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
-    public ResponseEntity<ResultDTO<String>> signUp(@RequestBody @Valid UserSignUpRequestDTO user) {
-        userService.signUp(user);
-        return ResponseEntity.ok(
-                ResultDTO.res(HttpStatus.CREATED, HttpStatus.CREATED.toString(), "User created successfully"));
+    @PostMapping("/signup")
+    public ResponseEntity<UserSignUpResponseDTO> signUp(@RequestBody @Valid UserSignUpRequestDTO user) {
+        UserSignUpResponseDTO response = userService.signUp(user);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<UserLoginResponseDTO> login(@RequestBody @Valid UserLoginRequestDTO request) {
+        UserLoginResponseDTO response = userService.login(request);
+        return ResponseEntity.ok(response);
     }
 
 }
