@@ -1,5 +1,6 @@
-package com.ddoddii.resume.jwt;
+package com.ddoddii.resume.security;
 
+import com.ddoddii.resume.dto.JwtTokenDTO;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -39,31 +40,44 @@ public class TokenProvider implements InitializingBean {
         this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
     }
 
-
     @Override
     public void afterPropertiesSet() {
         byte[] keyBytes = Decoders.BASE64.decode(secret);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createToken(Authentication authentication) {
+    public JwtTokenDTO createToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-        // 토큰의 expire 시간을 설정
+        // Token 의 expire 시간 설정
         long now = (new Date()).getTime();
-        Date validity = new Date(now + this.tokenValidityInMilliseconds);
+        Date accessTokenExpiresIn = new Date(now + this.tokenValidityInMilliseconds);
 
-        return Jwts.builder()
+        // Access Token 생성
+        String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities) // 정보 저장
-                .signWith(key, SignatureAlgorithm.HS512) // 사용할 암호화 알고리즘과 , signature 에 들어갈 secret값 세팅
-                .setExpiration(validity) // set Expire Time 해당 옵션 안넣으면 expire안함
+                .claim("auth", authorities)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+
+        // Refresh Token 생성
+        String refreshToken = Jwts.builder()
+                .setExpiration(new Date(now + this.tokenValidityInMilliseconds))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return JwtTokenDTO.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
     }
 
-    //토큰을 받아서 Authentication 객체를 반환
+    // Token 을 받아서 Authentication 객체를 반환
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts
                 .parserBuilder()
@@ -87,13 +101,13 @@ public class TokenProvider implements InitializingBean {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
-            log.info("잘못된 JWT 서명입니다.");
+            log.info("Invalid JWT Token");
         } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 서명입니다.");
+            log.info("Expired JWT Token");
         } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 서명입니다.");
+            log.info("Unsupported JWT Token");
         } catch (IllegalArgumentException e) {
-            log.info("JWT 토큰이 잘못되었습니다.");
+            log.info("JWT claims string is empty");
         }
         return false;
     }

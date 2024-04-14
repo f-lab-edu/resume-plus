@@ -2,9 +2,15 @@ package com.ddoddii.resume.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Builder
 @AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Builder
 public class JwtTokenDTO {
     private String grantType;
     private String accessToken;
