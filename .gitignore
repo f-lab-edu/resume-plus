@@ -40,3 +40,6 @@ myapp.log
 src/main/resources/env.properties
 src/main/resources/application.yaml
 *.gz
+
+src/main/resources/application-jwt.yaml
+src/main/resources/application-oauth.yaml
