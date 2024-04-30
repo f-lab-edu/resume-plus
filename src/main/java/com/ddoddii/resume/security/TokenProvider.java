@@ -31,13 +31,18 @@ public class TokenProvider implements InitializingBean {
     private static final String AUTHORITIES_KEY = "auth";
     private final String secret;
     private final long tokenValidityInMilliseconds;
+
+    private final long refreshTokenValidityInMilliseconds;
     private Key key;
 
     public TokenProvider(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds) {
+            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds,
+            @Value("${refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds
+    ) {
         this.secret = secret;
         this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
+        this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
     }
 
     @Override
@@ -64,8 +69,9 @@ public class TokenProvider implements InitializingBean {
                 .compact();
 
         // Refresh Token 생성
+        // Refresh Token 은 유효기간이 길며, Access Token 이 만료되어 재발급될 때 사용한다.
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + this.tokenValidityInMilliseconds))
+                .setExpiration(new Date(now + this.refreshTokenValidityInMilliseconds))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
@@ -74,7 +80,6 @@ public class TokenProvider implements InitializingBean {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
-
     }
 
     // Token 을 받아서 Authentication 객체를 반환
