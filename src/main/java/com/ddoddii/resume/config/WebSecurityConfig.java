@@ -2,10 +2,12 @@ package com.ddoddii.resume.config;
 
 import com.ddoddii.resume.security.JwtFilter;
 import com.ddoddii.resume.security.TokenProvider;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -13,11 +15,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
+
     private final TokenProvider tokenProvider;
 
-    public WebSecurityConfig(TokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web -> web.ignoring()
+                .requestMatchers("/error", "/favicon.ico");
     }
 
     @Bean
@@ -30,9 +36,12 @@ public class WebSecurityConfig {
                 .httpBasic((httpBasic) -> httpBasic.disable())
                 .authorizeHttpRequests((authorizeRequests)
                         -> authorizeRequests
-                        .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
+                        .requestMatchers("/", "/api/auth/signup", "/api/auth/login", "api/oauth2/callback/google")
+                        .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
+
+
 }
