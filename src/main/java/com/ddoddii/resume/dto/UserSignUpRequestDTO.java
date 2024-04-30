@@ -17,12 +17,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSignUpRequestDTO {
-    @NotBlank
-    private String userId;
 
     private String name;
     @Email
+    @NotBlank
     private String email;
     @NotBlank
     private String password;
+
+    private String pictureUrl;
 }

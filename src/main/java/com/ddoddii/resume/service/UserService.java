@@ -9,11 +9,11 @@ import com.ddoddii.resume.error.exception.BadCredentialsException;
 import com.ddoddii.resume.error.exception.DuplicateIdException;
 import com.ddoddii.resume.error.exception.NotExistIdException;
 import com.ddoddii.resume.model.User;
+import com.ddoddii.resume.model.eunm.RoleType;
 import com.ddoddii.resume.repository.UserRepository;
 import com.ddoddii.resume.security.TokenProvider;
 import com.ddoddii.resume.util.PasswordEncrypter;
 import jakarta.transaction.Transactional;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
@@ -29,73 +29,73 @@ public class UserService {
     private final UserRepository userRepository;
     private final TokenProvider tokenProvider;
 
+    // 사용자 회원가입시 사용자 정보와 로그인 토큰도 함께 반환
     public UserSignUpResponseDTO signUp(UserSignUpRequestDTO userSignUpRequestDTO) {
-        if (userRepository.existsByUserId(userSignUpRequestDTO.getUserId())) {
+        if (userRepository.existsByEmail(userSignUpRequestDTO.getEmail())) {
             throw new DuplicateIdException(UserErrorCode.DUPLICATE_USER);
         }
 
         User encryptedUser = encryptUser(userSignUpRequestDTO);
 
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                userSignUpRequestDTO.getEmail(),
+                userSignUpRequestDTO.getPassword()
+        );
+
         userRepository.save(encryptedUser);
         return UserSignUpResponseDTO.builder()
-                .userId(userSignUpRequestDTO.getUserId())
+                .name(userSignUpRequestDTO.getName())
+                .email(userSignUpRequestDTO.getEmail())
+                .pictureUrl(userSignUpRequestDTO.getPictureUrl())
+                .token(tokenProvider.createToken(authenticationToken))
                 .message("User signup success")
                 .build();
     }
 
+    // 사용자 로그인
     public UserLoginResponseDTO login(UserLoginRequestDTO userLoginRequestDTO) {
-        User user = userRepository.findByUserId(userLoginRequestDTO.getUserId())
+        User user = userRepository.findByEmail(userLoginRequestDTO.getEmail())
                 .orElseThrow(() -> new BadCredentialsException(UserErrorCode.BAD_CREDENTIALS));
         if (!PasswordEncrypter.isMatch(userLoginRequestDTO.getPassword(), user.getPassword())) {
             throw new BadCredentialsException(UserErrorCode.BAD_CREDENTIALS);
         }
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                userLoginRequestDTO.getUserId(),
+                userLoginRequestDTO.getEmail(),
                 userLoginRequestDTO.getPassword()
         );
 
         return UserLoginResponseDTO.builder()
-                .userId(user.getUserId())
+                .name(user.getName())
+                .email(user.getEmail())
+                .pictureUrl(user.getPictureUrl())
                 .token(tokenProvider.createToken(authenticationToken))
                 .build();
     }
 
-    private User encryptUser(UserSignUpRequestDTO userSignUpRequestDTO) {
-        String encryptedPassword = PasswordEncrypter.encrypt(userSignUpRequestDTO.getPassword());
-        User user = new User();
-        user.setUserId(userSignUpRequestDTO.getUserId());
-        user.setPassword(encryptedPassword);
-        user.setName(userSignUpRequestDTO.getName());
-        user.setEmail(userSignUpRequestDTO.getEmail());
-        return user;
-    }
-
-    public void deleteUser(String userId) {
-        User user = userRepository.findByUserId(userId)
+    public void deleteUser(String email) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotExistIdException(UserErrorCode.NOT_EXIST_USER));
         userRepository.delete(user);
     }
 
-    public void changeUserPassword(String userId, String newPassword) {
-        User user = userRepository.findByUserId(userId)
+    public void changeUserPassword(String email, String newPassword) {
+        User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new NotExistIdException(UserErrorCode.NOT_EXIST_USER));
         String newEncryptedPassword = PasswordEncrypter.encrypt(newPassword);
         user.setPassword(newEncryptedPassword);
         userRepository.save(user);
     }
 
-    public Optional<UserSignUpRequestDTO> findUserByIdAndPassword(String id, String password) {
-        return userRepository.findByUserId(id)
-                .filter(user -> PasswordEncrypter.isMatch(password, user.getPassword()))
-                .map(this::convertToDto);
+    private User encryptUser(UserSignUpRequestDTO userSignUpRequestDTO) {
+        String encryptedPassword = PasswordEncrypter.encrypt(userSignUpRequestDTO.getPassword());
+        User user = new User();
+        user.setPassword(encryptedPassword);
+        user.setName(userSignUpRequestDTO.getName());
+        user.setEmail(userSignUpRequestDTO.getEmail());
+        user.setRole(RoleType.USER);
+        user.setPictureUrl(userSignUpRequestDTO.getPictureUrl());
+        return user;
     }
 
-    private UserSignUpRequestDTO convertToDto(User user) {
-        return UserSignUpRequestDTO.builder()
-                .userId(user.getUserId())
-                .email(user.getEmail())
-                .name(user.getName())
-                .build();
-    }
 }
