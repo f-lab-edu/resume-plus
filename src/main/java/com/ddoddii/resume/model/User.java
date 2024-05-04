@@ -53,12 +53,7 @@ public class User extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @NotNull
     private RoleType role;
-
-    private String provider;
-
-    private String providerId;
-
-
+    
     @OneToMany(mappedBy = "user")
     private List<Resume> resumes;
 
