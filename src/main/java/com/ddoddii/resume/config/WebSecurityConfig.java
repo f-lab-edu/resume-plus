@@ -36,7 +36,8 @@ public class WebSecurityConfig {
                 .httpBasic((httpBasic) -> httpBasic.disable())
                 .authorizeHttpRequests((authorizeRequests)
                         -> authorizeRequests
-                        .requestMatchers("/", "/api/auth/signup", "/api/auth/login", "api/oauth2/callback/google")
+                        .requestMatchers("/", "/api/auth/signup", "/api/auth/login", "/api/auth/refresh",
+                                "api/oauth2/callback/google")
                         .permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
