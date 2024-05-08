@@ -10,10 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserSignUpResponseDTO {
-
     private String name;
     private String email;
     private String pictureUrl;
-    private JwtTokenDTO token;
-    private String message;
 }
