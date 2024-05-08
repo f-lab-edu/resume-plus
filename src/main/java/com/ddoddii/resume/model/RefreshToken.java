@@ -36,7 +36,7 @@ public class RefreshToken {
 
     private Instant expiryDate;
 
-    private String token;
+    private String refreshToken;
 
 
 }

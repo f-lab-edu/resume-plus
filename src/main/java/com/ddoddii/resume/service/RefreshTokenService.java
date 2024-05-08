@@ -32,7 +32,7 @@ public class RefreshTokenService {
         if (existingRefreshToken.isPresent()) {
             // Update existing refresh token
             RefreshToken refreshToken = existingRefreshToken.get();
-            refreshToken.setToken(token);
+            refreshToken.setRefreshToken(token);
             refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenValidityInSeconds * 1000));
             refreshTokenRepository.save(refreshToken);
             return refreshToken;
@@ -40,7 +40,7 @@ public class RefreshTokenService {
             // Create a new refresh token if it does not exist
             RefreshToken refreshToken = RefreshToken.builder()
                     .user(user)
-                    .token(token)
+                    .refreshToken(token)
                     .expiryDate(Instant.now().plusMillis(refreshTokenValidityInSeconds * 1000))
                     .build();
             refreshTokenRepository.save(refreshToken);
@@ -57,7 +57,7 @@ public class RefreshTokenService {
     public RefreshToken verifyExpiration(RefreshToken refreshToken) {
         if (refreshToken.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(refreshToken);
-            throw new RuntimeException(refreshToken.getToken() + "Refresh token is expired");
+            throw new RuntimeException(refreshToken.getRefreshToken() + "Refresh token is expired");
         }
         return refreshToken;
     }
