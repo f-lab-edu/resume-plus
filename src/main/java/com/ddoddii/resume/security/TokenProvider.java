@@ -29,26 +29,32 @@ import org.springframework.stereotype.Component;
 public class TokenProvider implements InitializingBean {
 
     private static final String AUTHORITIES_KEY = "auth";
-    private final String secret;
+    private final String accessTokenSecret;
+    private final String refreshTokenSecret;
     private final long tokenValidityInMilliseconds;
 
     private final long refreshTokenValidityInMilliseconds;
-    private Key key;
+    private Key accessKey;
+    private Key refreshKey;
 
     public TokenProvider(
-            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.access-token-secret}") String accessTokenSecret,
+            @Value("${jwt.refresh-token-secret}") String refreshTokenSecret,
             @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds,
             @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds
     ) {
-        this.secret = secret;
+        this.accessTokenSecret = accessTokenSecret;
+        this.refreshTokenSecret = refreshTokenSecret;
         this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
         this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
     }
 
     @Override
     public void afterPropertiesSet() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+        byte[] accessKeyBytes = Decoders.BASE64.decode(accessTokenSecret);
+        byte[] refreshKeyBytes = Decoders.BASE64.decode(refreshTokenSecret);
+        this.accessKey = Keys.hmacShaKeyFor(accessKeyBytes);
+        this.refreshKey = Keys.hmacShaKeyFor(refreshKeyBytes);
     }
 
     public JwtTokenDTO createToken(Authentication authentication) {
@@ -65,14 +71,14 @@ public class TokenProvider implements InitializingBean {
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
                 .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(accessKey, SignatureAlgorithm.HS256)
                 .compact();
 
         // Refresh Token 생성
         // Refresh Token 은 유효기간이 길며, Access Token 이 만료되어 재발급될 때 사용한다.
         String refreshToken = Jwts.builder()
                 .setExpiration(new Date(now + this.refreshTokenValidityInMilliseconds))
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(refreshKey, SignatureAlgorithm.HS256)
                 .compact();
 
         return JwtTokenDTO.builder()
@@ -86,7 +92,7 @@ public class TokenProvider implements InitializingBean {
     public Authentication getAuthentication(String token) {
         Claims claims = Jwts
                 .parserBuilder()
-                .setSigningKey(key)
+                .setSigningKey(accessKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
@@ -101,7 +107,7 @@ public class TokenProvider implements InitializingBean {
     //토큰의 유효성 검사
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder().setSigningKey(accessKey).build().parseClaimsJws(token);
             return true;
         } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token");
