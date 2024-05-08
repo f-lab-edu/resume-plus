@@ -76,7 +76,7 @@ public class UserService {
         JwtTokenDTO loginToken = tokenProvider.createToken(authenticationToken);
 
         //refresh token 저장
-        refreshTokenService.createRefreshToken(user.getEmail(), loginToken.getRefreshToken());
+        refreshTokenService.saveRefreshToken(user.getEmail(), loginToken.getRefreshToken());
 
         return UserLoginResponseDTO.builder()
                 .userId(user.getId())
@@ -105,7 +105,7 @@ public class UserService {
 
     // refreshToken 기반 accessToken 재발급
     public JwtTokenDTO generateNewAccessToken(String token) {
-        RefreshToken refreshToken = refreshTokenService.findByToken(token)
+        RefreshToken refreshToken = refreshTokenService.findByRefreshToken(token)
                 .orElseThrow(() -> new RuntimeException("Refresh Token not found"));
         User user = refreshToken.getUser();
         CustomUserDetails customUserDetails = new CustomUserDetails(user);
@@ -115,7 +115,7 @@ public class UserService {
                 customUserDetails.getAuthorities()
         );
         JwtTokenDTO newToken = tokenProvider.createToken(newAuthenticationToken);
-        refreshTokenService.createRefreshToken(user.getEmail(), newToken.getRefreshToken());
+        refreshTokenService.saveRefreshToken(user.getEmail(), newToken.getRefreshToken());
         return newToken;
     }
 
