@@ -12,13 +12,16 @@ import com.ddoddii.resume.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/auth/")
+@RequestMapping("/api/users/")
 @RequiredArgsConstructor
 public class UserController {
 
@@ -26,7 +29,7 @@ public class UserController {
     private final TokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
 
-    @PostMapping("/signup")
+    @PostMapping("/")
     public ResponseEntity<UserSignUpResponseDTO> signUp(@RequestBody @Valid UserSignUpRequestDTO user) {
         UserSignUpResponseDTO response = userService.signUp(user);
         return ResponseEntity.ok(response);
@@ -38,10 +41,17 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/refresh")
+    @PostMapping("/refresh-token")
     public ResponseEntity<JwtTokenDTO> refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
         JwtTokenDTO jwtTokenDTO = userService.generateNewAccessToken(refreshTokenRequestDTO.getToken());
         return ResponseEntity.ok(jwtTokenDTO);
+    }
+
+    @GetMapping("/current-user")
+    public ResponseEntity<String> getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUser = authentication.getName();
+        return ResponseEntity.ok(currentUser);
     }
 
 }
