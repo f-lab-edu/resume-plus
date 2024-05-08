@@ -72,7 +72,7 @@ public class TokenProvider implements InitializingBean {
         // Refresh Token 은 유효기간이 길며, Access Token 이 만료되어 재발급될 때 사용한다.
         String refreshToken = Jwts.builder()
                 .setExpiration(new Date(now + this.refreshTokenValidityInMilliseconds))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
 
         return JwtTokenDTO.builder()
@@ -90,13 +90,11 @@ public class TokenProvider implements InitializingBean {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
-
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
         User principal = new User(claims.getSubject(), "", authorities);
-
         return new UsernamePasswordAuthenticationToken(principal, token, authorities);
     }
 

@@ -2,27 +2,18 @@ package com.ddoddii.resume.security;
 
 import com.ddoddii.resume.model.User;
 import java.util.Collection;
-import java.util.stream.Collectors;
-import lombok.Getter;
+import java.util.Collections;
+import lombok.Builder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-@Getter
-public class CustomUserDetails implements UserDetails {
-    private final User user;
-
-    public CustomUserDetails(User user) {
-        this.user = user;
-    }
-
-    public final User getUser() {
-        return user;
-    }
+@Builder
+public record CustomUserDetails(User user) implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return user.getRoles().stream().map(o -> new SimpleGrantedAuthority(o.getName())).collect(Collectors.toList());
+        return Collections.singletonList(new SimpleGrantedAuthority(user.getRole().getKey()));
     }
 
     @Override

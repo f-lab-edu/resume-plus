@@ -24,7 +24,7 @@ public class RefreshTokenService {
     private long refreshTokenValidityInSeconds;
 
 
-    public RefreshToken createRefreshToken(String userEmail, String token) {
+    public RefreshToken saveRefreshToken(String userEmail, String token) {
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new BadCredentialsException(UserErrorCode.NOT_EXIST_USER));
         Optional<RefreshToken> existingRefreshToken = refreshTokenRepository.findByUser(user);
@@ -49,8 +49,8 @@ public class RefreshTokenService {
     }
 
 
-    public Optional<RefreshToken> findByToken(String token) {
-        return refreshTokenRepository.findByToken(token);
+    public Optional<RefreshToken> findByRefreshToken(String refreshToken) {
+        return refreshTokenRepository.findByRefreshToken(refreshToken);
     }
 
 

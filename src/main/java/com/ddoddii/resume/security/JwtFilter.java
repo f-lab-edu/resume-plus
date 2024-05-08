@@ -24,7 +24,8 @@ SecurityContext에 저장하여 인증된 요청을 처리할 수 있도록 한�
 @Component
 @AllArgsConstructor
 public class JwtFilter extends GenericFilterBean {
-
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final int BEARER_BEGIN_INDEX = 7;
     private TokenProvider tokenProvider;
 
     @Override
@@ -45,10 +46,9 @@ public class JwtFilter extends GenericFilterBean {
     // Request Header 에서 토큰 정보 추출
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader(HttpHeaders.AUTHORIZATION);
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer")) {
-            return bearerToken.substring(7);
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX)) {
+            return bearerToken.substring(BEARER_BEGIN_INDEX);
         }
-
         return null;
     }
 

@@ -14,6 +14,7 @@ import com.ddoddii.resume.model.User;
 import com.ddoddii.resume.model.eunm.RoleType;
 import com.ddoddii.resume.repository.RefreshTokenRepository;
 import com.ddoddii.resume.repository.UserRepository;
+import com.ddoddii.resume.security.CustomUserDetails;
 import com.ddoddii.resume.security.TokenProvider;
 import com.ddoddii.resume.util.PasswordEncrypter;
 import jakarta.transaction.Transactional;
@@ -44,43 +45,41 @@ public class UserService {
 
         User encryptedUser = encryptUser(userSignUpRequestDTO);
 
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                userSignUpRequestDTO.getEmail(),
-                userSignUpRequestDTO.getPassword()
-        );
-
         userRepository.save(encryptedUser);
-
-        JwtTokenDTO newToken = tokenProvider.createToken(authenticationToken);
 
         return UserSignUpResponseDTO.builder()
                 .name(userSignUpRequestDTO.getName())
                 .email(userSignUpRequestDTO.getEmail())
                 .pictureUrl(userSignUpRequestDTO.getPictureUrl())
-                .token(newToken)
-                .message("User signup success")
                 .build();
     }
 
     // 사용자 로그인
     public UserLoginResponseDTO login(UserLoginRequestDTO userLoginRequestDTO) {
+        // 이메일로 데이터베이스에서 사용자 찾기
         User user = userRepository.findByEmail(userLoginRequestDTO.getEmail())
                 .orElseThrow(() -> new BadCredentialsException(UserErrorCode.BAD_CREDENTIALS));
+        // 비밀번호 일치하는지 검증
         if (!PasswordEncrypter.isMatch(userLoginRequestDTO.getPassword(), user.getPassword())) {
             throw new BadCredentialsException(UserErrorCode.BAD_CREDENTIALS);
         }
+        // GrantedAuthority 를 반환하는 메서드를 가진 CustomUserDetails 만들기
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
 
+        // Authorities 를 가지는 Authentication 객체
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 userLoginRequestDTO.getEmail(),
-                userLoginRequestDTO.getPassword()
+                userLoginRequestDTO.getPassword(),
+                customUserDetails.getAuthorities()
         );
 
         JwtTokenDTO loginToken = tokenProvider.createToken(authenticationToken);
 
         //refresh token 저장
-        refreshTokenService.createRefreshToken(user.getEmail(), loginToken.getRefreshToken());
+        refreshTokenService.saveRefreshToken(user.getEmail(), loginToken.getRefreshToken());
 
         return UserLoginResponseDTO.builder()
+                .userId(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .pictureUrl(user.getPictureUrl())
@@ -106,16 +105,17 @@ public class UserService {
 
     // refreshToken 기반 accessToken 재발급
     public JwtTokenDTO generateNewAccessToken(String token) {
-        RefreshToken refreshToken = refreshTokenService.findByToken(token)
+        RefreshToken refreshToken = refreshTokenService.findByRefreshToken(token)
                 .orElseThrow(() -> new RuntimeException("Refresh Token not found"));
         User user = refreshToken.getUser();
-        log.info("user : {}", user.getEmail());
+        CustomUserDetails customUserDetails = new CustomUserDetails(user);
         UsernamePasswordAuthenticationToken newAuthenticationToken = new UsernamePasswordAuthenticationToken(
                 user.getEmail(),
-                user.getPassword()
+                user.getPassword(),
+                customUserDetails.getAuthorities()
         );
         JwtTokenDTO newToken = tokenProvider.createToken(newAuthenticationToken);
-        refreshTokenService.createRefreshToken(user.getEmail(), newToken.getRefreshToken());
+        refreshTokenService.saveRefreshToken(user.getEmail(), newToken.getRefreshToken());
         return newToken;
     }
 
@@ -127,9 +127,8 @@ public class UserService {
         user.setPassword(encryptedPassword);
         user.setName(userSignUpRequestDTO.getName());
         user.setEmail(userSignUpRequestDTO.getEmail());
-        user.setRole(RoleType.USER);
+        user.setRole(RoleType.ROLE_USER);
         user.setPictureUrl(userSignUpRequestDTO.getPictureUrl());
-
         return user;
     }
 
