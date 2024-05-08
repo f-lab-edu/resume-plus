@@ -6,14 +6,13 @@ import com.ddoddii.resume.dto.UserLoginRequestDTO;
 import com.ddoddii.resume.dto.UserLoginResponseDTO;
 import com.ddoddii.resume.dto.UserSignUpRequestDTO;
 import com.ddoddii.resume.dto.UserSignUpResponseDTO;
+import com.ddoddii.resume.model.User;
 import com.ddoddii.resume.security.TokenProvider;
 import com.ddoddii.resume.service.RefreshTokenService;
 import com.ddoddii.resume.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -49,9 +48,8 @@ public class UserController {
 
     @GetMapping("/current-user")
     public ResponseEntity<String> getCurrentUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUser = authentication.getName();
-        return ResponseEntity.ok(currentUser);
+        User user = userService.getCurrentUser();
+        return ResponseEntity.ok(user.getEmail());
     }
 
 }
