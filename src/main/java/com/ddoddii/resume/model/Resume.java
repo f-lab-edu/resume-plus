@@ -2,7 +2,6 @@ package com.ddoddii.resume.model;
 
 import com.ddoddii.resume.model.eunm.Position;
 import com.ddoddii.resume.model.question.PersonalQuestion;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -18,12 +17,14 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "resumes")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Setter
 @Builder
 public class Resume extends BaseEntity {
 
@@ -32,14 +33,9 @@ public class Resume extends BaseEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "position")
     private Position position;
 
-    @Column(name = "content")
     private String content;
-
-    @Column(name = "basic")
-    private boolean basic;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
