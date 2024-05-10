@@ -7,8 +7,6 @@ import com.ddoddii.resume.dto.UserLoginResponseDTO;
 import com.ddoddii.resume.dto.UserSignUpRequestDTO;
 import com.ddoddii.resume.dto.UserSignUpResponseDTO;
 import com.ddoddii.resume.model.User;
-import com.ddoddii.resume.security.TokenProvider;
-import com.ddoddii.resume.service.RefreshTokenService;
 import com.ddoddii.resume.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
-    private final TokenProvider tokenProvider;
-    private final RefreshTokenService refreshTokenService;
 
     @PostMapping("/")
     public ResponseEntity<UserSignUpResponseDTO> signUp(@RequestBody @Valid UserSignUpRequestDTO user) {
