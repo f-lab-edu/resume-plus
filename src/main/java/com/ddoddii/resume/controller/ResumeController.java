@@ -7,6 +7,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,6 +41,12 @@ public class ResumeController {
                                                @RequestBody ResumeDTO resumeModifyRequestDTO) {
         resumeService.modifyResume(resumeId, resumeModifyRequestDTO);
         return ResponseEntity.status(HttpStatus.OK).body("Resume Updated");
+    }
+
+    @DeleteMapping("/{resumeId}")
+    public ResponseEntity<String> deleteResume(@PathVariable long resumeId) {
+        resumeService.deleteResume(resumeId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Resume Deleted");
     }
 
 

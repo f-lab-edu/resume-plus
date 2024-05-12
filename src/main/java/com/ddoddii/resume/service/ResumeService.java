@@ -3,6 +3,7 @@ package com.ddoddii.resume.service;
 import com.ddoddii.resume.dto.ResumeDTO;
 import com.ddoddii.resume.dto.ResumeResponseDTO;
 import com.ddoddii.resume.error.errorcode.ResumeErrorCode;
+import com.ddoddii.resume.error.exception.BadCredentialsException;
 import com.ddoddii.resume.error.exception.NotExistResumeException;
 import com.ddoddii.resume.model.Resume;
 import com.ddoddii.resume.model.User;
@@ -58,6 +59,17 @@ public class ResumeService {
                         .content(resume.getContent())
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    // 사용자 레쥬메 지우기
+    public void deleteResume(long resumeId) {
+        User user = userService.getCurrentUser();
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new NotExistResumeException(ResumeErrorCode.NOT_EXIST_RESUME));
+        if (resume.getUser() != user) {
+            throw new BadCredentialsException(ResumeErrorCode.NOT_RESUME_OWNER);
+        }
+        resumeRepository.delete(resume);
     }
 
 }
