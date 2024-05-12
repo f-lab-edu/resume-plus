@@ -4,11 +4,10 @@ import com.ddoddii.resume.dto.UserSignUpRequestDTO;
 import com.ddoddii.resume.error.errorcode.UserErrorCode;
 import com.ddoddii.resume.error.exception.DuplicateIdException;
 import com.ddoddii.resume.error.exception.NotExistIdException;
-import com.ddoddii.resume.model.RoleType;
 import com.ddoddii.resume.model.User;
+import com.ddoddii.resume.model.eunm.RoleType;
 import com.ddoddii.resume.repository.UserRepository;
 import com.ddoddii.resume.util.PasswordEncrypter;
-import java.time.LocalDateTime;
 import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,6 @@ public class UserService {
         user.setName(userSignUpRequestDTO.getName());
         user.setEmail(userSignUpRequestDTO.getEmail());
         user.setRole(RoleType.USER);
-        user.setCreatedAt(LocalDateTime.now());
         return user;
     }
 

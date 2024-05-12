@@ -1,5 +1,6 @@
 package com.ddoddii.resume.model;
 
+import com.ddoddii.resume.model.eunm.RoleType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -10,9 +11,11 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
-import java.time.LocalDateTime;
 import java.util.List;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
@@ -20,9 +23,12 @@ import lombok.Setter;
         uniqueConstraints = {
                 @UniqueConstraint(columnNames = "user_id")
         })
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Getter
 @Setter
-public class User {
+public class User extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -44,10 +50,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private RoleType role;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
     @OneToMany(mappedBy = "user")
     private List<Resume> resumes;
 
+    @OneToMany(mappedBy = "user")
+    private List<Interview> interviews;
 }
