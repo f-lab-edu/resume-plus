@@ -14,6 +14,7 @@ import com.ddoddii.resume.repository.PersonalQuestionRepository;
 import com.ddoddii.resume.repository.ResumeRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +36,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 @PropertySource("classpath:application-openai.yaml")
+@Transactional
 @Slf4j
 public class QuestionGenService {
     @Value("classpath:/prompts/perQ-gen-system.st")
