@@ -126,10 +126,8 @@ public class UserService {
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserEmail = authentication.getName();
-        User user = userRepository.findByEmail(currentUserEmail)
+        return userRepository.findByEmail(currentUserEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        return user;
-
     }
 
     // 비밀번호 보안 적용한 사용자 반환
