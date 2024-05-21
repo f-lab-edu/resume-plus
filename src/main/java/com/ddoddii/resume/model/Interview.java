@@ -59,17 +59,17 @@ public class Interview extends BaseEntity {
     private InterviewType interviewType;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "resume_id")
     private Resume resume;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToMany(mappedBy = "resume")
+    @OneToMany(mappedBy = "interview")
     private List<PersonalQuestion> personalQuestions;
 
-    @OneToOne(mappedBy = "resume")
+    @OneToOne(mappedBy = "interview")
     private Evaluation evaluation;
 
 

@@ -43,7 +43,6 @@ class UserServiceTest {
     @BeforeEach
     public void makeUser() {
         user = UserSignUpRequestDTO.builder()
-                .userId("user")
                 .password(PasswordEncrypter.encrypt("test123"))
                 .email("test@email.com")
                 .name("testUser")
@@ -54,7 +53,7 @@ class UserServiceTest {
     @DisplayName("회원가입에 성공합니다")
     void 유저_회원가입_성공() throws Exception {
         //When
-        when(userRepository.existsByUserId(any(String.class))).thenReturn(false);
+        when(userRepository.existsByEmail(any(String.class))).thenReturn(false);
 
         userService.signUp(user);
         //Then
@@ -65,7 +64,7 @@ class UserServiceTest {
     @DisplayName("회원가입에 실패합니다 : 중복된 아이디")
     void 유저_회원가입_실패_중복_아이디() {
         //When
-        when(userRepository.existsByUserId(user.getUserId())).thenReturn(true);
+        when(userRepository.existsByEmail(user.getEmail())).thenReturn(true);
         //Then
         assertThatThrownBy(() -> userService.signUp(user))
                 .isInstanceOf(DuplicateIdException.class);
@@ -77,13 +76,12 @@ class UserServiceTest {
     void 유저_삭제_성공() {
         //Given
         User mockUser = new User();
-        mockUser.setUserId(user.getUserId());
         mockUser.setEmail(user.getEmail());
         mockUser.setName(user.getName());
         mockUser.setPassword(user.getPassword());
         //When
-        when(userRepository.findByUserId(user.getUserId())).thenReturn(Optional.of(mockUser));
-        userService.deleteUser(user.getUserId());
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(mockUser));
+        userService.deleteUser(user.getEmail());
         //Then
         verify(userRepository).delete(mockUser);
     }
@@ -92,11 +90,11 @@ class UserServiceTest {
     @DisplayName("유저 삭제에 실패합니다 : 삭제할 아이디 존재하지 않음")
     void 유저_삭제_실패() {
         //Given
-        final String userId = user.getUserId();
+        final String email = user.getEmail();
         //When
-        when(userRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
         //Then
-        assertThatThrownBy(() -> userService.deleteUser(userId))
+        assertThatThrownBy(() -> userService.deleteUser(email))
                 .isInstanceOf(NotExistIdException.class);
         verify(userRepository, never()).delete(any(User.class));
     }
@@ -106,14 +104,13 @@ class UserServiceTest {
     void 유저_비밀번호_변경_성공() {
         //Given
         User mockUser = new User();
-        mockUser.setUserId(user.getUserId());
         mockUser.setEmail(user.getEmail());
         mockUser.setName(user.getName());
         mockUser.setPassword(user.getPassword());
         final String changedPassword = "change123";
         //When
-        when(userRepository.findByUserId(user.getUserId())).thenReturn(Optional.of(mockUser));
-        userService.changeUserPassword(mockUser.getUserId(), changedPassword);
+        when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(mockUser));
+        userService.changeUserPassword(mockUser.getEmail(), changedPassword);
         //Then
         assertTrue(PasswordEncrypter.isMatch(changedPassword, mockUser.getPassword()));
     }

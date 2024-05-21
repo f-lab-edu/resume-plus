@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -34,20 +35,20 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "user_id", unique = true)
-    private String userId;
-
     @Column(name = "password")
     private String password;
 
     @Column(name = "name")
     private String name;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
-    @Column(name = "role")
+    @Column(name = "picture_url")
+    private String pictureUrl;
+
     @Enumerated(EnumType.STRING)
+    @NotNull
     private RoleType role;
 
     @OneToMany(mappedBy = "user")
@@ -55,4 +56,6 @@ public class User extends BaseEntity {
 
     @OneToMany(mappedBy = "user")
     private List<Interview> interviews;
+
+
 }

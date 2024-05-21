@@ -38,6 +38,9 @@ public class Resume extends BaseEntity {
     @Column(name = "content")
     private String content;
 
+    @Column(name = "basic")
+    private boolean basic;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
